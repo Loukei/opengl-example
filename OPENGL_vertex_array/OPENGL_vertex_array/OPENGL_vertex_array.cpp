@@ -9,12 +9,9 @@
 // Include librarys
 ////////////////////////////////////////
 #include "stdafx.h"
-#include "GL/freeglut.h"
 #include < vector >
-
-////////////////////////////////////////
-// Global variables
-////////////////////////////////////////
+#include "GL/freeglut.h"
+//#include "glm/glm.hpp"
 
 ////////////////////////////////////////
 // Name space
@@ -31,6 +28,7 @@ void Draw_glvertex();
 void Draw_glvertex_with_array();
 void Draw_VA();
 void Draw_VA_with_Vector();
+//void Draw_VA_with_glm();
 
 void Draw_axes();
 
@@ -112,6 +110,7 @@ void Reshape(int width, int high){
 }
 
 // 使用最傳統的glBegin()/glEnd() 畫方塊, 24次function call
+// 缺點是每次都要手動去填入資料，而且function call太多會拖慢速度
 void Draw_glvertex(){
 
 	glFrontFace(GL_CCW);
@@ -155,6 +154,7 @@ void Draw_glvertex(){
 
 // 利用先定義好頂點與顏色的方式來畫會更有效率,只需要定義8個頂點與顏色
 // 再以編號紀錄每個面的頂點順序即可
+// 還是使用24次 function call,太多點的時候繪製速度會變慢
 void Draw_glvertex_with_array(){
 	//8 vertex
 	GLfloat vertex_list[][3] = {
@@ -203,7 +203,7 @@ void Draw_glvertex_with_array(){
 	glDisable(GL_BACK);
 }
 
-// 現在換成使用vertex array 來畫方塊,使用的資料大致上一樣
+// 現在換成使用vertex array 來畫方塊,使用的資料大致上一樣(靜態陣列)
 // 但是一次送進去會快很多
 void Draw_VA(){
 	// 8 vertex for 1 voxel
@@ -257,6 +257,9 @@ void Draw_VA(){
 
 // 同樣是使用vertex array ，但是引入的方式使用C++樣板的vector
 // 可以更好的達成模型引入的作法(動態增加大小)
+// 每次輸入值的時候使用vertex_list.push_back() 或 vertex_list.insert()即可
+// 缺點是容器是使用GLfloat,代表vertex_list.size()存的是 (8個頂點 * 3個軸) = 24
+// 而非直觀的代表頂點數目 => index_list 的索引值不好算
 void Draw_VA_with_Vector(){
 	std::vector<GLfloat> vertex_list;
 	std::vector<GLubyte> color_list;
@@ -308,6 +311,14 @@ void Draw_VA_with_Vector(){
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BACK);
 }
+
+// 使用vertex array + vector的方式，同時vector內存的是使用glm::
+//void Draw_VA_with_glm(){
+//	std::vector<glm::vec3> vertex_list;
+//	std::vector<glm::vec4> color_list;
+//	std::vector<GLuint> index_list;
+//
+//}
 
 //畫XYZ軸
 void Draw_axes(){
